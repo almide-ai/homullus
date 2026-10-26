@@ -56,7 +56,7 @@ effect fn append_bullet(text: String) -> Result[Unit, String] = {
     err(e) => err("memory dir: ${e}")
     ok(_) => {
       let line = "- ${string.trim(text)}\n"
-      match fs.append(path, line) {
+      match fs.append_text(path, line) {
         err(e) => err("memory append: ${e}")
         ok(_) => ok(())
       }
@@ -66,7 +66,7 @@ effect fn append_bullet(text: String) -> Result[Unit, String] = {
 
 effect fn clear_all() -> Result[Unit, String] = {
   let path = memory_path()
-  match fs.write(path, "") {
+  match fs.write_text(path, "") {
     err(e) => err("memory clear: ${e}")
     ok(_) => ok(())
   }

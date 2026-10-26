@@ -102,7 +102,7 @@ effect fn check(label: String, cond: Bool) -> Unit =
   }
 
 effect fn ensure_test_file() -> Unit = {
-  match fs.write("/tmp/homullus_agent_check.txt", "hi from disk") {
+  match fs.write_text("/tmp/homullus_agent_check.txt", "hi from disk") {
     err(e) => println("  setup failed: ${e}")
     ok(_) => ()
   }

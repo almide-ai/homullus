@@ -187,7 +187,7 @@ effect fn print_prompt(state: State) -> Unit = {
 
 effect fn repl(state: State) -> Unit = {
   print_prompt(state)
-  let raw = io.read_line()
+  let raw = io.read_line() ?? ""
   let input = string.trim(raw)
   if input == "" then repl(state)
   else

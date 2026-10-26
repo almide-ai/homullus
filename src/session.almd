@@ -29,32 +29,32 @@ effect fn ensure_dir() -> Result[String, String] = {
 effect fn current_dir() -> String = sessions_dir()
 
 fn tool_call_to_value(tc: almai.ToolCall) -> Value =
-  json.object([
-    ("id", json.from_string(tc.id)),
-    ("name", json.from_string(tc.name)),
-    ("arguments", json.from_string(tc.arguments)),
+  value.object([
+    ("id", value.string(tc.id)),
+    ("name", value.string(tc.name)),
+    ("arguments", value.string(tc.arguments)),
   ])
 
 fn message_to_value(m: almai.Message) -> Value =
-  json.object([
-    ("role", json.from_string(m.role)),
-    ("content", json.from_string(m.content)),
-    ("tool_call_id", json.from_string(m.tool_call_id)),
-    ("tool_calls", json.array(list.map(m.tool_calls, (tc) => tool_call_to_value(tc)))),
+  value.object([
+    ("role", value.string(m.role)),
+    ("content", value.string(m.content)),
+    ("tool_call_id", value.string(m.tool_call_id)),
+    ("tool_calls", value.array(list.map(m.tool_calls, (tc) => tool_call_to_value(tc)))),
   ])
 
 fn value_to_tool_call(v: Value) -> almai.ToolCall =
   ToolCall {
-    id: json.get_string(v, "id") |> option.unwrap_or(""),
-    name: json.get_string(v, "name") |> option.unwrap_or(""),
-    arguments: json.get_string(v, "arguments") |> option.unwrap_or("{}"),
+    id: value.get_string(v, "id") |> option.unwrap_or(""),
+    name: value.get_string(v, "name") |> option.unwrap_or(""),
+    arguments: value.get_string(v, "arguments") |> option.unwrap_or("{}"),
   }
 
 fn value_to_message(v: Value) -> almai.Message = {
-  let role = json.get_string(v, "role") |> option.unwrap_or("user")
-  let content = json.get_string(v, "content") |> option.unwrap_or("")
-  let tool_call_id = json.get_string(v, "tool_call_id") |> option.unwrap_or("")
-  let tool_calls_arr = json.get_array(v, "tool_calls") |> option.unwrap_or([])
+  let role = value.get_string(v, "role") |> option.unwrap_or("user")
+  let content = value.get_string(v, "content") |> option.unwrap_or("")
+  let tool_call_id = value.get_string(v, "tool_call_id") |> option.unwrap_or("")
+  let tool_calls_arr = value.get_array(v, "tool_calls") |> option.unwrap_or([])
   let tool_calls = list.map(tool_calls_arr, (tc) => value_to_tool_call(tc))
   match role {
     "system"    => Message { role: role, content: content, tool_call_id: tool_call_id, tool_calls: tool_calls }
@@ -69,12 +69,12 @@ fn value_to_message(v: Value) -> almai.Message = {
 // path on success.
 effect fn save(history: List[almai.Message]) -> Result[String, String] = {
   let dir = ensure_dir()!
-  let ts = int.to_string(env.unix_timestamp())
+  let ts = int.to_string(datetime.now())
   let path = "${dir}/${ts}.json"
-  let body = json.stringify(json.object([
-    ("messages", json.array(list.map(history, (m) => message_to_value(m)))),
+  let body = json.stringify(value.object([
+    ("messages", value.array(list.map(history, (m) => message_to_value(m)))),
   ]))
-  match fs.write(path, body) {
+  match fs.write_text(path, body) {
     err(e) => err("session write: ${e}")
     ok(_) => ok(path)
   }
@@ -98,7 +98,7 @@ effect fn resume_latest() -> Result[List[almai.Message], String] = {
           ok(text) => match json.parse(text) {
             err(e) => err("session parse: ${e}")
             ok(v) => {
-              let msgs_arr = json.get_array(v, "messages") |> option.unwrap_or([])
+              let msgs_arr = value.get_array(v, "messages") |> option.unwrap_or([])
               ok(list.map(msgs_arr, (m) => value_to_message(m)))
             }
           }

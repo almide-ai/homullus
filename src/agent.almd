@@ -128,8 +128,8 @@ effect fn execute_tool(
       err(e) => ok(("invalid tool arguments: ${e}", true))
       ok(args) =>
         if call.name == "Task" then {
-          let desc = json.get_string(args, "description") |> option.unwrap_or("(unnamed)")
-          let prompt = json.get_string(args, "prompt") |> option.unwrap_or("")
+          let desc = value.get_string(args, "description") |> option.unwrap_or("(unnamed)")
+          let prompt = value.get_string(args, "prompt") |> option.unwrap_or("")
           match run_subtask(caller, model, desc, prompt) {
             err(e) => ok((e, true))
             ok(s)  => ok((s, false))
