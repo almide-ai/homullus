@@ -30,6 +30,7 @@ effect fn read_tool_provider(
         name: "Read",
         arguments: "{\"path\":\"/tmp/homullus_agent_check.txt\"}",
       }],
+      sampling: Sampling { },
     })
   else
     ok(LLMResponse {
@@ -38,6 +39,7 @@ effect fn read_tool_provider(
       usage: usage,
       finish_reason: "stop",
       tool_calls: [],
+      sampling: Sampling { },
     })
 }
 
@@ -52,6 +54,7 @@ effect fn plain_text_provider(
     usage: Usage { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 },
     finish_reason: "stop",
     tool_calls: [],
+    sampling: Sampling { },
   })
 
 effect fn error_provider(
@@ -74,17 +77,20 @@ effect fn multi_round_provider(
       model: "scripted", usage: usage, finish_reason: "tool_use",
       tool_calls: [ToolCall { id: "c1", name: "Read",
         arguments: "{\"path\":\"/tmp/homullus_agent_check.txt\"}" }],
+      sampling: Sampling { },
     })
     1 => ok(LLMResponse {
       content: "now I'll Glob",
       model: "scripted", usage: usage, finish_reason: "tool_use",
       tool_calls: [ToolCall { id: "c2", name: "Glob",
         arguments: "{\"pattern\":\"/tmp/homullus_agent_check.*\"}" }],
+      sampling: Sampling { },
     })
     _ => ok(LLMResponse {
       content: "done",
       model: "scripted", usage: usage, finish_reason: "stop",
       tool_calls: [],
+      sampling: Sampling { },
     })
   }
 }
