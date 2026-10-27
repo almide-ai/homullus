@@ -32,7 +32,7 @@ effect fn memory_dir() -> String =
 // Read the current memory contents. Returns empty string when the file
 // doesn't exist (first run) — equivalent to "no memory yet".
 effect fn read_all() -> String = {
-  let path = memory_path()
+  let path = memory_path()!
   match fs.read_text(path) {
     err(_) => ""
     ok(text) => text
@@ -43,15 +43,15 @@ effect fn read_all() -> String = {
 // (No leading newlines — context.almd inserts the separator between
 // sections so the joined output stays uniform.)
 effect fn build() -> String = {
-  let text = read_all()
+  let text = read_all()!
   let trimmed = string.trim(text)
   if trimmed == "" then ""
   else "## User memory (from MEMORY.md)\n\n${trimmed}"
 }
 
 effect fn append_bullet(text: String) -> Result[Unit, String] = {
-  let dir = memory_dir()
-  let path = memory_path()
+  let dir = memory_dir()!
+  let path = memory_path()!
   match fs.mkdir_p(dir) {
     err(e) => err("memory dir: ${e}")
     ok(_) => {
@@ -65,7 +65,7 @@ effect fn append_bullet(text: String) -> Result[Unit, String] = {
 }
 
 effect fn clear_all() -> Result[Unit, String] = {
-  let path = memory_path()
+  let path = memory_path()!
   match fs.write_text(path, "") {
     err(e) => err("memory clear: ${e}")
     ok(_) => ok(())

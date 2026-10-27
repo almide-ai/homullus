@@ -43,7 +43,7 @@ effect fn check(mode: String, tool: String, args_json: String) -> Bool =
   match classify(mode, tool, args_json) {
     Allow   => true,
     Deny    => false,
-    Confirm => ask("[permission] allow ${tool}?"),
+    Confirm => ask("[permission] allow ${tool}?")!,
   }
 
 test "is_read_only" {

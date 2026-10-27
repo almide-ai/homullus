@@ -64,7 +64,7 @@ effect fn build_system_prompt() -> String = {
   - Be concise. Prefer doing the task over describing it.
   - When you finish a task, stop calling tools and answer in plain text.
   """
-  base + homu_context.build()
+  base + homu_context.build()!
 }
 
 // ── Slash commands ──
@@ -105,8 +105,8 @@ effect fn handle_slash(state: State, name: String, arg: String) -> Option[State]
   match name {
     "exit" => none
     "version" => { io.print("homullus v${VERSION}\n") ; some(state) }
-    "help" => { cmd_help() ; some(state) }
-    "tools" => { cmd_tools() ; some(state) }
+    "help" => { cmd_help()! ; some(state) }
+    "tools" => { cmd_tools()! ; some(state) }
     "clear" => {
       io.print("Conversation cleared.\n")
       some({ ...state, history: [], usage: agent.empty_usage() })
@@ -131,13 +131,13 @@ effect fn handle_slash(state: State, name: String, arg: String) -> Option[State]
         ok(_) => {
           io.print("Remembered. Reload with new system prompt next turn? Yes — rebuilding now.\n")
           {
-            let sp = build_system_prompt()
+            let sp = build_system_prompt()!
             some({ ...state, system_prompt: sp })
           }
         }
       }
     "memory" => {
-      let mem = memory.read_all()
+      let mem = memory.read_all()!
       if string.trim(mem) == "" then io.print("(no memories yet — use /remember <text>)\n")
       else io.print("${mem}\n")
       some(state)
@@ -148,7 +148,7 @@ effect fn handle_slash(state: State, name: String, arg: String) -> Option[State]
         ok(_) => {
           io.print("All memories cleared.\n")
           {
-            let sp = build_system_prompt()
+            let sp = build_system_prompt()!
             some({ ...state, system_prompt: sp })
           }
         }
@@ -186,18 +186,18 @@ effect fn print_prompt(state: State) -> Unit = {
 }
 
 effect fn repl(state: State) -> Unit = {
-  print_prompt(state)
+  print_prompt(state)!
   let raw = io.read_line() ?? ""
   let input = string.trim(raw)
-  if input == "" then repl(state)
+  if input == "" then repl(state)!
   else
     match parse_slash(input) {
-      some(parts) => match handle_slash(state, parts.0, parts.1) {
+      some(parts) => match handle_slash(state, parts.0, parts.1)! {
         none => io.print("Bye!\n")
-        some(next) => repl(next)
+        some(next) => repl(next)!
       }
       none => {
-        let threshold = read_compact_threshold()
+        let threshold = read_compact_threshold()!
         let result = agent.run_turn(
           (m, ms, op) => agent.streaming_provider(m, ms, op),
           state.model,
@@ -213,7 +213,7 @@ effect fn repl(state: State) -> Unit = {
           ok(_) => ()
         }
         io.print("\n")
-        repl({ ...state, history: result.history, usage: agent.add_usage(state.usage, result.usage) })
+        repl({ ...state, history: result.history, usage: agent.add_usage(state.usage, result.usage) })!
       }
     }
 }
@@ -229,7 +229,7 @@ effect fn main() -> Unit = {
     model: model,
     mode: mode,
     history: [],
-    system_prompt: build_system_prompt(),
+    system_prompt: build_system_prompt()!,
     usage: agent.empty_usage(),
-  })
+  })!
 }

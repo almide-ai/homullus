@@ -19,14 +19,14 @@ effect fn sessions_dir() -> String =
   }
 
 effect fn ensure_dir() -> Result[String, String] = {
-  let dir = sessions_dir()
+  let dir = sessions_dir()!
   match fs.mkdir_p(dir) {
     err(e) => err("session dir: ${e}")
     ok(_) => ok(dir)
   }
 }
 
-effect fn current_dir() -> String = sessions_dir()
+effect fn current_dir() -> String = sessions_dir()!
 
 fn tool_call_to_value(tc: almai.ToolCall) -> Value =
   value.object([
@@ -83,7 +83,7 @@ effect fn save(history: List[almai.Message]) -> Result[String, String] = {
 // Load the most recently saved session. Returns an empty history if
 // the directory doesn't exist or has no .json files.
 effect fn resume_latest() -> Result[List[almai.Message], String] = {
-  let dir = current_dir()
+  let dir = current_dir()!
   match fs.list_dir(dir) {
     err(_) => ok([])
     ok(entries) => {

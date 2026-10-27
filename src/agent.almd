@@ -120,7 +120,7 @@ effect fn execute_tool(
   call: almai.ToolCall,
 ) -> Result[(String, Bool), String] = {
   let args_json = call.arguments
-  let allowed = perm.check(mode, call.name, args_json)
+  let allowed = perm.check(mode, call.name, args_json)!
   if not allowed then
     ok(("permission denied by user", true))
   else
@@ -165,11 +165,11 @@ effect fn process_calls(
   match list.first(calls) {
     none => ok(acc)
     some(call) => {
-      print_tool_call(call)
+      print_tool_call(call)!
       let exec = execute_tool(caller, model, mode, call)!
       let output = exec.0
       let is_err = exec.1
-      print_tool_result(call, output, is_err)
+      print_tool_result(call, output, is_err)!
       let next = acc + [make_tool_feedback(call, output, is_err)]
       process_calls(caller, model, list.drop(calls, 1), next, mode)
     }

@@ -51,9 +51,9 @@ effect fn read_git_status() -> String = {
 // Compose both sources into one block. Empty when neither is present —
 // the caller can append unconditionally.
 effect fn build() -> String = {
-  let claude = read_claude_md()
-  let git = read_git_status()
-  let mem = memory.build()
+  let claude = read_claude_md()!
+  let git = read_git_status()!
+  let mem = memory.build()!
   let parts = list.filter([claude, git, mem], (s) => s != "")
   if list.is_empty(parts) then ""
   else "\n\n" + list.join(parts, "\n\n")
