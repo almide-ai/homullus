@@ -34,7 +34,7 @@ fn classify(mode: String, tool: String, args_json: String) -> Decision =
 
 effect fn ask(prompt: String) -> Bool = {
   io.print(prompt + " [y/N] ")
-  let line = io.read_line()
+  let line = io.read_line() ?? ""
   let answer = string.trim(string.to_lower(line))
   answer == "y" or answer == "yes"
 }
@@ -43,7 +43,7 @@ effect fn check(mode: String, tool: String, args_json: String) -> Bool =
   match classify(mode, tool, args_json) {
     Allow   => true,
     Deny    => false,
-    Confirm => ask("[permission] allow ${tool}?"),
+    Confirm => ask("[permission] allow ${tool}?")!,
   }
 
 test "is_read_only" {

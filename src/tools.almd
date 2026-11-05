@@ -48,13 +48,13 @@ fn definitions() -> List[ttools.Tool] = [
 ]
 
 fn arg_string(args: Value, key: String) -> String =
-  json.get_string(args, key) |> option.unwrap_or("")
+  value.get_string(args, key) |> option.unwrap_or("")
 
 effect fn run_read(args: Value) -> Result[String, String] =
   fs.read_text(arg_string(args, "path"))
 
 effect fn run_write(args: Value) -> Result[String, String] =
-  match fs.write(arg_string(args, "path"), arg_string(args, "content")) {
+  match fs.write_text(arg_string(args, "path"), arg_string(args, "content")) {
     err(e) => err(e)
     ok(_)  => ok("wrote ${arg_string(args, "path")}")
   }
@@ -66,10 +66,10 @@ effect fn run_edit(args: Value) -> Result[String, String] = {
   match fs.read_text(path) {
     err(e) => err(e)
     ok(content) => {
-      let count = string.count(content, old_s)
+      let count = string.count_matches(content, old_s)
       match count {
         0 => err("old_string not found in ${path}")
-        1 => match fs.write(path, string.replace(content, old_s, new_s)) {
+        1 => match fs.write_text(path, string.replace(content, old_s, new_s)) {
           err(e) => err(e)
           ok(_)  => ok("edited ${path}")
         }
